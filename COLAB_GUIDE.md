@@ -145,6 +145,30 @@ SessionNotCreatedException: Chrome instance exited
 - `webdriver-manager`를 사용하세요 (위의 새로운 방식)
 - 이 패키지가 자동으로 올바른 ChromeDriver를 다운로드합니다
 
+### 문제 1-1: DevToolsActivePort 에러
+```
+Chrome failed to start: exited abnormally
+DevToolsActivePort file doesn't exist
+```
+
+**해결책:**
+1. **런타임 재시작** (가장 효과적)
+   - Colab 메뉴: Runtime > Restart runtime
+   - 재시작 후 모든 셀을 다시 실행하세요
+
+2. **Chrome 브라우저 직접 설치**
+   ```python
+   !apt-get update
+   !apt-get install -y chromium-browser chromium-chromedriver
+   ```
+
+3. **최신 코드 사용**
+   - 제공된 최신 코드는 DevToolsActivePort 에러를 해결하는 다양한 옵션을 포함하고 있습니다:
+     - `--remote-debugging-port=9222`
+     - `--disable-dev-shm-usage`
+     - `--no-sandbox`
+     - 등 20+ 개의 안정성 옵션
+
 ### 문제 2: 콘텐츠를 찾을 수 없음
 ```
 경고: 콘텐츠를 찾을 수 없습니다.

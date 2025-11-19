@@ -29,27 +29,54 @@ def setup_driver():
     """
     chrome_options = Options()
 
-    # 필수 옵션들
+    # 필수 옵션들 (Colab 환경 최적화)
     chrome_options.add_argument('--headless=new')  # 새로운 headless 모드
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--disable-software-rasterizer')
     chrome_options.add_argument('--disable-extensions')
+    chrome_options.add_argument('--disable-setuid-sandbox')
+
+    # DevToolsActivePort 에러 해결을 위한 옵션들
+    chrome_options.add_argument('--remote-debugging-port=9222')
+    chrome_options.add_argument('--disable-dev-tools')
+    chrome_options.add_argument('--disable-background-networking')
+    chrome_options.add_argument('--disable-background-timer-throttling')
+    chrome_options.add_argument('--disable-backgrounding-occluded-windows')
+    chrome_options.add_argument('--disable-breakpad')
+    chrome_options.add_argument('--disable-component-extensions-with-background-pages')
+    chrome_options.add_argument('--disable-features=TranslateUI,BlinkGenPropertyTrees')
+    chrome_options.add_argument('--disable-ipc-flooding-protection')
+    chrome_options.add_argument('--disable-renderer-backgrounding')
+    chrome_options.add_argument('--force-color-profile=srgb')
+    chrome_options.add_argument('--hide-scrollbars')
+    chrome_options.add_argument('--metrics-recording-only')
+    chrome_options.add_argument('--mute-audio')
+
+    # 윈도우 사이즈 및 표시 설정
     chrome_options.add_argument('--window-size=1920,1080')
+    chrome_options.add_argument('--start-maximized')
 
     # User Agent 설정
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
     # 추가 안정성 옵션
     chrome_options.add_argument('--disable-blink-features=AutomationControlled')
-    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
     chrome_options.add_experimental_option('useAutomationExtension', False)
+
+    # 로그 레벨 설정
+    chrome_options.add_argument('--log-level=3')
+    chrome_options.add_experimental_option('prefs', {
+        'profile.default_content_setting_values.notifications': 2,
+        'profile.managed_default_content_settings.images': 2  # 이미지 로드 안함 (속도 향상)
+    })
 
     try:
         if USE_WEBDRIVER_MANAGER:
             # webdriver-manager 사용 (권장)
-            print("webdriver-manager를 사용하여 ChromeDriver 설정 중...")
+            print("ChromeDriver 설정 중...")
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=chrome_options)
         else:
@@ -57,14 +84,18 @@ def setup_driver():
             print("기본 방식으로 ChromeDriver 설정 중...")
             driver = webdriver.Chrome(options=chrome_options)
 
+        print("✅ ChromeDriver 설정 완료!")
         return driver
 
     except Exception as e:
-        print(f"ChromeDriver 설정 실패: {str(e)}")
+        print(f"❌ ChromeDriver 설정 실패: {str(e)}")
         print("\n해결 방법:")
         print("1. Colab에서 다음 명령어를 실행하세요:")
         print("   !pip install webdriver-manager")
         print("2. 런타임을 재시작하세요")
+        print("3. 여전히 문제가 발생하면 다음을 시도하세요:")
+        print("   !apt-get update")
+        print("   !apt-get install -y chromium-browser chromium-chromedriver")
         raise
 
 
