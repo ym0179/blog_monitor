@@ -93,6 +93,7 @@ def extract_blog_content_only(html):
 def get_recent_posts_from_category(blog_id, category_no, days=14):
     """
     특정 카테고리의 최근 글 목록 가져오기
+    ⚠️ 카테고리 목록 페이지는 iframe이 없습니다!
 
     Args:
         blog_id: 블로그 ID (예: 'yminsong')
@@ -113,15 +114,10 @@ def get_recent_posts_from_category(blog_id, category_no, days=14):
         print(f"카테고리 페이지 접속: {category_url}")
 
         driver.get(category_url)
-        time.sleep(3)
+        time.sleep(5)
 
-        # iframe 전환
-        iframe = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "mainFrame"))
-        )
-        driver.switch_to.frame(iframe)
-        time.sleep(2)
-
+        # ✅ 카테고리 목록 페이지는 iframe 전환 불필요!
+        print("HTML 파싱 중...")
         # HTML 파싱
         html = BeautifulSoup(driver.page_source, "html.parser")
 
@@ -199,6 +195,7 @@ def get_recent_posts_from_category(blog_id, category_no, days=14):
 def extract_full_post(url):
     """
     개별 글의 전체 내용 추출 (title + content)
+    ✅ 개별 글 페이지는 mainFrame iframe 사용
 
     Args:
         url: 블로그 글 URL
@@ -210,16 +207,20 @@ def extract_full_post(url):
     try:
         driver = setup_driver()
 
-        print(f"  글 접속 중: {url}")
+        print(f"  글 접속: {url}")
         driver.get(url)
-        time.sleep(3)
+        time.sleep(5)
 
-        # iframe 전환
-        iframe = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "mainFrame"))
-        )
-        driver.switch_to.frame(iframe)
-        time.sleep(2)
+        # ✅ 개별 글 페이지는 mainFrame iframe이 있음
+        try:
+            iframe = WebDriverWait(driver, 15).until(
+                EC.presence_of_element_located((By.ID, "mainFrame"))
+            )
+            driver.switch_to.frame(iframe)
+            print("  ✅ iframe 전환 완료")
+            time.sleep(3)
+        except Exception as e:
+            print(f"  ⚠️ iframe 전환 실패 (구버전 블로그?): {e}")
 
         # HTML 파싱
         html = BeautifulSoup(driver.page_source, "html.parser")
