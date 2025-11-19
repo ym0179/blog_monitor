@@ -8,25 +8,64 @@ import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
+
+try:
+    from webdriver_manager.chrome import ChromeDriverManager
+    USE_WEBDRIVER_MANAGER = True
+except ImportError:
+    USE_WEBDRIVER_MANAGER = False
+    print("경고: webdriver-manager가 설치되지 않았습니다.")
+    print("더 안정적인 실행을 위해 'pip install webdriver-manager'를 권장합니다.")
 
 
 def setup_driver():
     """
     Chrome WebDriver 설정 (구글 Colab용)
+    webdriver-manager를 사용하여 자동으로 ChromeDriver 관리
     """
     chrome_options = Options()
-    chrome_options.add_argument('--headless')  # 백그라운드 실행
+
+    # 필수 옵션들
+    chrome_options.add_argument('--headless=new')  # 새로운 headless 모드
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument('--disable-software-rasterizer')
+    chrome_options.add_argument('--disable-extensions')
     chrome_options.add_argument('--window-size=1920,1080')
-    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36")
 
-    driver = webdriver.Chrome(options=chrome_options)
-    return driver
+    # User Agent 설정
+    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+    # 추가 안정성 옵션
+    chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_experimental_option('useAutomationExtension', False)
+
+    try:
+        if USE_WEBDRIVER_MANAGER:
+            # webdriver-manager 사용 (권장)
+            print("webdriver-manager를 사용하여 ChromeDriver 설정 중...")
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+        else:
+            # 기본 방식
+            print("기본 방식으로 ChromeDriver 설정 중...")
+            driver = webdriver.Chrome(options=chrome_options)
+
+        return driver
+
+    except Exception as e:
+        print(f"ChromeDriver 설정 실패: {str(e)}")
+        print("\n해결 방법:")
+        print("1. Colab에서 다음 명령어를 실행하세요:")
+        print("   !pip install webdriver-manager")
+        print("2. 런타임을 재시작하세요")
+        raise
 
 
 def extract_blog_content(url, wait_time=5):

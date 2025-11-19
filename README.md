@@ -19,16 +19,17 @@ pip install -r requirements.txt
 
 Chrome 브라우저와 ChromeDriver가 설치되어 있어야 합니다.
 
-### 구글 Colab
+### 구글 Colab (권장)
+
+**⚠️ 중요: 구글 Colab에서는 `webdriver-manager`를 사용해야 합니다!**
 
 Colab 노트북에서는 첫 번째 셀에서 다음을 실행하세요:
 
 ```bash
-!apt-get update
-!apt-get install -y chromium-chromedriver
-!cp /usr/lib/chromium-browser/chromedriver /usr/bin
-!pip install selenium beautifulsoup4
+!pip install selenium beautifulsoup4 webdriver-manager
 ```
+
+더 자세한 사용법은 [COLAB_GUIDE.md](COLAB_GUIDE.md)를 참고하세요.
 
 ## 사용 방법
 
